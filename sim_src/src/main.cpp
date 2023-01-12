@@ -50,16 +50,6 @@ void sim_exit() {
 int main() {
 	nvboard::init();
 	sim_init();
-	for (auto s = size_t(0); s < (1 << 10); ++s) {
-		pTop->io_sw = s;
-		step_and_dump_wave();
-		auto simResult = pTop->io_led;
-		auto stdAns = ((s >> (2 + (s % 4) * 2)) & 0x3);
-		if (simResult != stdAns) {
-			std::cout << "sim result = " << simResult << std::endl;
-			std::cout << "std answer = " << stdAns << std::endl;
-		}
-	}
 #ifdef HAS_NVBOARD
 	while(!(pTop->io_sw>>15)){
 		step_and_dump_wave();

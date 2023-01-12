@@ -7,6 +7,13 @@ class NVBoardIOBundle extends Bundle {
     val clk  = Input(Bool())
     val data = Input(Bool())
   }
+  val btn = new Bundle {
+    val c = Input(Bool())
+    val u = Input(Bool())
+    val d = Input(Bool())
+    val l = Input(Bool())
+    val r = Input(Bool())
+  }
   val led = Output(UInt(16.W))
   val vga = new Bundle {
     val clk    = Output(Bool())
