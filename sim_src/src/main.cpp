@@ -40,6 +40,14 @@ void sim_init() {
 	nvboard_bind_all_pins(pTop.get());
 	nvboard_init();
 #endif
+	//	reset
+	pTop->reset = false;
+	step_and_dump_wave();
+	pTop->reset = true;
+	for (int n = 100; n--;) {
+		step_and_dump_wave();
+	}
+	pTop->reset = false;
 }
 
 void sim_exit() {
@@ -51,7 +59,7 @@ int main() {
 	nvboard::init();
 	sim_init();
 #ifdef HAS_NVBOARD
-	while(!(pTop->io_sw>>15)){
+	while (!(pTop->io_sw >> 15)) {
 		step_and_dump_wave();
 	}
 #endif
