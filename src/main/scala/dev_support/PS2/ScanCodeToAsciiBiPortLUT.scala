@@ -1,18 +1,16 @@
 package dev_support.PS2
+
 import chisel3._
 import chisel3.util._
 
-
-class ScanCodeToAsciiLUT extends Module {
+class ScanCodeToAsciiBiPortLUT extends Module {
   val io = IO {
     new Bundle {
-      val scanCode  = Input(UInt(16.W))
-      val isUpper   = Input(Bool())
-      val isAscii   = Output(Bool())
-      val asciiCode = Output(UInt(8.W))
-      val isCtrl    = Output(Bool())
-      val isShift   = Output(Bool())
-      val isCaps    = Output(Bool())
+      val scanCode       = Input(UInt(16.W))
+      val isAscii        = Output(Bool())
+      val asciiCode      = Output(UInt(8.W))
+      val upperAsciiCode = Output(UInt(8.W))
+      val isLetter       = Output(Bool())
     }
   }
   val lut = Array(
@@ -63,29 +61,24 @@ class ScanCodeToAsciiLUT extends Module {
     0x41 -> (',', '<'),
     0x49 -> ('.', '>'),
     0x4a -> ('/', '?'),
-    0x0d -> ('\t', '\t'),
-    0x66 -> ('\b', '\b'),
-    0x29 -> (' ', ' '),
-    0x5a -> ('\n', '\n')
+    0x29 -> (' ', ' ')
   )
 
-  io.asciiCode :=
-    Mux(
-      io.isUpper,
-      MuxLookup(
-        io.scanCode(7, 0),
-        0.U(8.W),
-        lut.collect { case p => (p._1.U(8.W), p._2._2.U(8.W)) }.toIndexedSeq
-      ),
-      MuxLookup(
-        io.scanCode(7, 0),
-        0.U(8.W),
-        lut.collect { case p => (p._1.U(8.W), p._2._1.U(8.W)) }.toIndexedSeq
-      )
-    )
-  io.isAscii := (!io.scanCode(15, 8).orR) && io.asciiCode.orR
+  val letters  = ('a' to 'z').toSet ++ ('A' to 'Z').toSet
+  val isLetter = VecInit(letters.collect { ch => io.asciiCode === ch.toByte.U }.toIndexedSeq)
+  io.isLetter := isLetter.asUInt.orR
 
-  io.isCtrl  := io.scanCode === 0x14.U || io.scanCode === 0xe014.U
-  io.isShift := io.scanCode === 0x12.U || io.scanCode === 0x59.U
-  io.isCaps  := io.scanCode === 0x58.U
+  io.asciiCode :=
+    MuxLookup(
+      io.scanCode(7, 0),
+      0.U(8.W),
+      lut.collect { case p => (p._1.U(8.W), p._2._1.U(8.W)) }.toIndexedSeq
+    )
+  io.upperAsciiCode :=
+    MuxLookup(
+      io.scanCode(7, 0),
+      0.U(8.W),
+      lut.collect { case p => (p._1.U(8.W), p._2._2.U(8.W)) }.toIndexedSeq
+    )
+  io.isAscii := io.upperAsciiCode.orR || io.asciiCode.orR
 }

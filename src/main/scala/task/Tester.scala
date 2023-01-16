@@ -9,5 +9,19 @@ class Tester extends Module {
   io.vga.getElements.foreach(x => x := 0.U)
   io.seg.foreach(x => x := ~0.U(8.W))
 
-  io.led := Cat(0.U, ClockDivider(clock, 4).asBool)
+  withClockAndReset(io.sw(0).asClock, reset) {
+    val rf = Reg(new Bundle {
+      val a0 = UInt(8.W)
+    })
+    rf.a0 := ~rf.a0
+    val rfi = RegInit({
+      val b = Wire(new Bundle {
+        val a0 = UInt(8.W)
+      })
+      b.a0 := 0.U
+      b
+    })
+    rfi.a0 := ~rfi.a0
+    io.led := Cat(0.U, rf.a0, rfi.a0)
+  }
 }

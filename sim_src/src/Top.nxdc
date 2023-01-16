@@ -1,7 +1,7 @@
 top=Top
 
-io_vga_hSync VGA_VSYNC
-io_vga_vSync VGA_HSYNC
+io_vga_hSync VGA_HSYNC
+io_vga_vSync VGA_VSYNC
 io_vga_blankN VGA_BLANK_N
 
 io_btn_c BTNC
